@@ -92,7 +92,7 @@ func CreateUser() gin.HandlerFunc {
 						http.StatusCreated, responses.UserResponse{
 							Status: http.StatusCreated,
 							Message: "success",
-							Data: map[string]interface{}{"users": u, "token": token},
+							Data: map[string]interface{}{"user": u, "token": token},
 						},
 					)
 				}

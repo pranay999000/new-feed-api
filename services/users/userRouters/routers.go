@@ -7,4 +7,5 @@ import (
 
 func UserRoutes(r *gin.Engine) {
 	r.GET("/api/users", controllers.GetAllUsers())
+	r.PUT("/api/user/update", controllers.UpdateUser())
 }
