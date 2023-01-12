@@ -156,3 +156,19 @@
 .upload__image:hover {
   cursor: pointer;
 }
+
+.upload{
+  display: flex;
+  flex-direction: column;
+
+}
+.upload input,.upload textarea{
+  margin: 1rem;
+  padding: .5rem;
+  outline: none;
+  border: 1px solid rgb(177, 177, 177);
+  border-radius: 4px;
+}
+.upload textarea{
+  height: 5rem;
+}

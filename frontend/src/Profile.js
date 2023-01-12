@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./profile.css";
-import handmaid from "./images/handmaid.jpg";
+// import handmaid from "./images/handmaid.jpg";
 import feedIcon from "./images/news.png";
 import followingIcon from "./images/following.png";
 import followersIcon from "./images/followers.png";
@@ -19,9 +19,9 @@ import Item from "@mui/material/Grid";
 import { Avatar } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
+// import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-
+import axios from 'axios';
 const style = {
   position: "absolute",
   top: "50%",
@@ -29,9 +29,11 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 400,
   bgcolor: "background.paper",
-  border: "2px solid #000",
+  
   boxShadow: 24,
-  p: 4,
+  p: 2,
+  border:0,
+  outline:0
 };
 
 function Profile() {
@@ -187,7 +189,7 @@ function Profile() {
     setFeedItem(feedList.map((f) => f));
     setFollowingItem(followingList.map((f) => f));
     setFollowerItem(followerList.map((f) => f));
-  });
+  }, []);
 
   const setFollowingPage = (event) => {
     event.preventDefault();
@@ -209,14 +211,56 @@ function Profile() {
     setProfileUser(followerList[index]);
   }
 
-  const [file, setFile] = useState(null);
-
+  const [imageUrl, setImageUrl] = useState(null);
+  const [title,setTitle] = useState('');
+  const [description,setDescription] = useState('')
   const handleChange = (e) => {
-    const data = e.target.files[0];
-    // setFile(data);
-    console.log(data);
+    const image = e.target.files[0];
+
+    // Check if required
+    // if (
+    //   image.type !== "image/jpg" &&
+    //   image.type !== "image/png" &&
+    //   image.type !== "image/jpeg"
+    // ) {
+
+    //   return;
+    // }
+    // if (image.size > 2048 * 1024) {
+    //   return;
+    // }
+
+    const formdata = new FormData();
+    formdata.append("profile", image);
+
+    axios({
+      method: "post",
+      url: "endpoint",
+      data: formdata,
+    })
+      .then((res) => {
+        setImageUrl(res.data.url)
+      })
+      .catch((e) => {
+        console.log(e)
+      });
   };
 
+  const handleUpload = () =>{
+    axios({
+      method: "post",
+      url: "endpoint",
+      data: {
+        imgaUrl:imageUrl,
+        title:title,
+        desc:description
+      },
+    }).then((res)=>{
+      console.log(res)
+    }).catch((e)=>{
+      console.log(e)
+    })
+  }
   return (
     <div className="profile">
       <Modal
@@ -226,16 +270,21 @@ function Profile() {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <input
-            type="file"
-            accept="image/jpeg, image/png, image/jpg"
-            onChange={handleChange}
-          />
-          <input type="text" placeholder="Title" onChange={handleChange} />
+          <div className="upload">
+            <input
+              type="file"
+              accept="image/jpeg, image/png, image/jpg"
+              onChange={handleChange}
+            />
+            <input type="text" placeholder="Title" onChange={(e)=>setTitle(e.target.value)} />
+            <textarea placeholder="Description" onChange={(e)=>setDescription(e.target.value)}></textarea>
+            <Button variant="primary" onClick={handleUpload}>Upload</Button>
+          </div>
+          
         </Box>
       </Modal>
       <div className="profile__details">
-        <img className="profile__avatar" src={profileUser.image} />
+        <img className="profile__avatar" src={profileUser.image} alt="avatar" />
         <div>
           <div className="name__and__follow__button">
             <h2 className="profile__name">{profileUser.name}</h2>
@@ -245,7 +294,7 @@ function Profile() {
         </div>
       </div>
       <div className="nav__bar">
-        <img className="feed__image" src={feedIcon} onClick={setFeedPage} />
+        <img className="feed__image" src={feedIcon} onClick={setFeedPage} alt="feedimage" />
         <p className="feed__count" onClick={setFeedPage}>
           <strong>{profileUser.news} News</strong>
           <br />
@@ -255,6 +304,7 @@ function Profile() {
           className="following__image"
           src={followingIcon}
           onClick={setFollowingPage}
+          alt="follower"
         />
         <p className="feed__count" onClick={setFollowingPage}>
           <strong>{profileUser.followings} Following</strong>
@@ -265,6 +315,7 @@ function Profile() {
           className="following__image"
           src={followersIcon}
           onClick={setFollowerPage}
+          alt="following"
         />
         <p className="feed__count" onClick={setFollowerPage}>
           <strong>{profileUser.followers} Followers</strong>
@@ -272,7 +323,7 @@ function Profile() {
           <text className="nav__text">Total Followers Count</text>
         </p>
         <div className="upload__image" onClick={handleOpen}>
-          <img className="upload__img" src={upload} onClick={setFollowerPage} />
+          <img className="upload__img" src={upload} onClick={setFollowerPage} alt="upload" />
           <p className="upload__text" onClick={setFollowerPage}>
             <strong>Upload</strong>
             <br />
@@ -291,7 +342,7 @@ function Profile() {
               <Grid item xs={2} sm={4} md={4} key={index}>
                 <Item className="item__item">
                   <div className="item__image">
-                    <img className="feed__item" src={f.image} />
+                    <img className="feed__item" src={f.image} alt="feed item" />
                     <div className="item__details">
                       <text>
                         <strong>{f.title}</strong>
