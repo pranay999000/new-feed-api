@@ -5,23 +5,29 @@ import feedIcon from "./images/news.png";
 import followingIcon from "./images/following.png";
 import followersIcon from "./images/followers.png";
 import sharp from "./images/sharp3.jpg";
-import harmione from "./images/hermione.jpg";
+import hermione from "./images/hermione.jpg";
 import harry from "./images/harry.png";
-import leia from "./images/leia.jpg";
 import seb from "./images/seb.jpg";
 import norton from "./images/norton.jpg";
 import trooper from "./images/trooper.jpg";
 import jack from "./images/jack_sparrow.jpeg";
-import mia from "./images/mia_cropped.jpg";
 import upload from "./images/upload.png";
 import Grid from "@mui/material/Grid";
 import Item from "@mui/material/Grid";
 import { Avatar } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import leia from "./images/leia.jpg";
+import mia from "./images/mia_cropped.jpg";
+import tooper from "./images/trooper.jpg";
+import handmaid from "./images/handmaid.jpg";
+import dany from "./images/dany_cropped.jpg";
+import indiana from "./images/indiana_jones.jpg";
+
 // import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-import axios from 'axios';
+import axios from "axios";
+import { ReactSession } from "react-client-session";
 const style = {
   position: "absolute",
   top: "50%",
@@ -29,164 +35,63 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 400,
   bgcolor: "background.paper",
-  
+
   boxShadow: 24,
   p: 2,
-  border:0,
-  outline:0
+  border: 0,
+  outline: 0,
 };
+
+const map = new Map();
+map.set("dany", dany);
+map.set("handmaid", handmaid);
+map.set("harry", harry);
+map.set("hermione", hermione);
+map.set("indiana", indiana);
+map.set("jack", jack);
+map.set("leia", leia);
+map.set("mia", mia);
+map.set("norton", norton);
+map.set("seb", seb);
+map.set("tooper", tooper);
+map.set("sharp", sharp);
 
 function Profile() {
   const [feedItem, setFeedItem] = useState([]);
   const [followingItem, setFollowingItem] = useState([]);
   const [followerItem, setFollowerItem] = useState([]);
   const [profileHome, setProfileHome] = useState(0);
-  const [profileUser, setProfileUser] = useState({
-    image: leia,
-    name: "Tyler Dunkins",
-    desc: "Unbelievable is an American true crime television miniseries starring Toni Collette, Merritt Wever, and Kaitlyn Dever. It is about a series of rapes in Washington State and Colorado.[2] The show was co-created by Susannah Grant, Ayelet Waldman, and Michael Chabon. All three co-creators and Sarah Timberman, Carl Beverly, and Katie Couric were executive producers. It was released on September 13, 2019, on Netflix.",
-    followings: 45,
-    followers: 30,
-    news: 23,
-  });
-  const [followersIndex, setFollowersIndex] = useState(0);
+  const [profileUser, setProfileUser] = useState({});
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const feedList = [
-    {
-      image: mia,
-      title: "Mia is a waitress",
-      desc: "text, or an empty string for decorative images. 'Avatar' is defined",
-    },
-    {
-      image: harmione,
-      title: "Mia is a waitress",
-      desc: "text, or an empty string for decorative images. 'Avatar' is defined",
-    },
-    {
-      image: jack,
-      title: "Mia is a waitress",
-      desc: "text, or an empty string for decorative images. 'Avatar' is defined",
-    },
-    {
-      image: mia,
-      title: "Mia is a waitress",
-      desc: "text, or an empty string for decorative images. 'Avatar' is defined",
-    },
-    {
-      image: harmione,
-      title: "Mia is a waitress",
-      desc: "text, or an empty string for decorative images. 'Avatar' is defined",
-    },
-    {
-      image: jack,
-      title: "Mia is a waitress",
-      desc: "text, or an empty string for decorative images. 'Avatar' is defined",
-    },
-  ];
+  const followingList = [];
 
-  const followingList = [
-    {
-      image: sharp,
-      name: "Sharp Objects",
-      followings: 45,
-      followers: 30,
-      news: 23,
-    },
-    {
-      image: trooper,
-      name: "Strom Tooper",
-      followings: 45,
-      followers: 30,
-      news: 23,
-    },
-    {
-      image: norton,
-      name: "Tyler Dunkins",
-      followings: 45,
-      followers: 30,
-      news: 23,
-    },
-    {
-      image: sharp,
-      name: "Sharp Objects",
-      followings: 45,
-      followers: 30,
-      news: 23,
-    },
-    {
-      image: trooper,
-      name: "Strom Tooper",
-      desc: "Unbelievable is an American true crime television miniseries starring Toni Collette, Merritt Wever, and Kaitlyn Dever. It is about a series of rapes in Washington State and Colorado.[2] The show was co-created by Susannah Grant, Ayelet Waldman, and Michael Chabon. All three co-creators and Sarah Timberman, Carl Beverly, and Katie Couric were executive producers. It was released on September 13, 2019, on Netflix.",
-      followings: 45,
-      followers: 30,
-      news: 23,
-    },
-    {
-      image: norton,
-      name: "Tyler Dunkins",
-      desc: "Unbelievable is an American true crime television miniseries starring Toni Collette, Merritt Wever, and Kaitlyn Dever. It is about a series of rapes in Washington State and Colorado.[2] The show was co-created by Susannah Grant, Ayelet Waldman, and Michael Chabon. All three co-creators and Sarah Timberman, Carl Beverly, and Katie Couric were executive producers. It was released on September 13, 2019, on Netflix.",
-      followings: 45,
-      followers: 30,
-      news: 23,
-    },
-  ];
+  const followerList = [];
 
-  const followerList = [
-    {
-      image: seb,
-      name: "Sharp Objects",
-      desc: "Unbelievable is an American true crime television miniseries starring Toni Collette, Merritt Wever, and Kaitlyn Dever. It is about a series of rapes in Washington State and Colorado.[2] The show was co-created by Susannah Grant, Ayelet Waldman, and Michael Chabon. All three co-creators and Sarah Timberman, Carl Beverly, and Katie Couric were executive producers. It was released on September 13, 2019, on Netflix.",
-      followings: 45,
-      followers: 30,
-      news: 23,
+  const config = {
+    headers: {
+      Authorization: `Bearer ${ReactSession.get("token")}`,
     },
-    {
-      image: harry,
-      name: "Strom Tooper",
-      desc: "Unbelievable is an American true crime television miniseries starring Toni Collette, Merritt Wever, and Kaitlyn Dever. It is about a series of rapes in Washington State and Colorado.[2] The show was co-created by Susannah Grant, Ayelet Waldman, and Michael Chabon. All three co-creators and Sarah Timberman, Carl Beverly, and Katie Couric were executive producers. It was released on September 13, 2019, on Netflix.",
-      followings: 45,
-      followers: 30,
-      news: 23,
-    },
-    {
-      image: leia,
-      name: "Tyler Dunkins",
-      desc: "Unbelievable is an American true crime television miniseries starring Toni Collette, Merritt Wever, and Kaitlyn Dever. It is about a series of rapes in Washington State and Colorado.[2] The show was co-created by Susannah Grant, Ayelet Waldman, and Michael Chabon. All three co-creators and Sarah Timberman, Carl Beverly, and Katie Couric were executive producers. It was released on September 13, 2019, on Netflix.",
-      followings: 45,
-      followers: 30,
-      news: 23,
-    },
-    {
-      image: seb,
-      name: "Sharp Objects",
-      desc: "Unbelievable is an American true crime television miniseries starring Toni Collette, Merritt Wever, and Kaitlyn Dever. It is about a series of rapes in Washington State and Colorado.[2] The show was co-created by Susannah Grant, Ayelet Waldman, and Michael Chabon. All three co-creators and Sarah Timberman, Carl Beverly, and Katie Couric were executive producers. It was released on September 13, 2019, on Netflix.",
-      followings: 45,
-      followers: 30,
-      news: 23,
-    },
-    {
-      image: harry,
-      name: "Strom Tooper",
-      desc: "Unbelievable is an American true crime television miniseries starring Toni Collette, Merritt Wever, and Kaitlyn Dever. It is about a series of rapes in Washington State and Colorado.[2] The show was co-created by Susannah Grant, Ayelet Waldman, and Michael Chabon. All three co-creators and Sarah Timberman, Carl Beverly, and Katie Couric were executive producers. It was released on September 13, 2019, on Netflix.",
-      followings: 45,
-      followers: 30,
-      news: 23,
-    },
-    {
-      image: leia,
-      name: "Tyler Dunkins",
-      desc: "Unbelievable is an American true crime television miniseries starring Toni Collette, Merritt Wever, and Kaitlyn Dever. It is about a series of rapes in Washington State and Colorado.[2] The show was co-created by Susannah Grant, Ayelet Waldman, and Michael Chabon. All three co-creators and Sarah Timberman, Carl Beverly, and Katie Couric were executive producers. It was released on September 13, 2019, on Netflix.",
-      followings: 45,
-      followers: 30,
-      news: 23,
-    },
-  ];
+  };
 
   useEffect(() => {
-    setFeedItem(feedList.map((f) => f));
+    axios.get("http://localhost:9010/api/feed/user", config).then((res) => {
+      setFeedItem(res.data.data.feed.map((f) => f));
+    });
+
+    axios
+      .get(
+        `${process.env.REACT_APP_base_url}api/user?user_id=${ReactSession.get(
+          "user_id"
+        )}`,
+        config
+      )
+      .then((res) => {
+        console.log(res.data.data.user);
+        setProfileUser(res.data.data.user);
+      });
     setFollowingItem(followingList.map((f) => f));
     setFollowerItem(followerList.map((f) => f));
   }, []);
@@ -206,61 +111,54 @@ function Profile() {
     setProfileHome(0);
   };
 
-  function handleFollowerClick(index) {
-    setFollowersIndex(index);
-    setProfileUser(followerList[index]);
-  }
+  function handleFollowerClick(index) {}
 
   const [imageUrl, setImageUrl] = useState(null);
-  const [title,setTitle] = useState('');
-  const [description,setDescription] = useState('')
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const handleChange = (e) => {
     const image = e.target.files[0];
 
-    // Check if required
-    // if (
-    //   image.type !== "image/jpg" &&
-    //   image.type !== "image/png" &&
-    //   image.type !== "image/jpeg"
-    // ) {
-
-    //   return;
-    // }
-    // if (image.size > 2048 * 1024) {
-    //   return;
-    // }
-
     const formdata = new FormData();
-    formdata.append("profile", image);
+    formdata.append("image_file", image);
+    const config = {
+      headers: {
+        Authorization: `Bearer ${ReactSession.get("token")}`,
+        "Content-Type": "multipart/form-data",
+      },
+    };
 
-    axios({
-      method: "post",
-      url: "endpoint",
-      data: formdata,
-    })
+    axios
+      .post("http://localhost:9010/api/feed/upload/image", formdata, config)
       .then((res) => {
-        setImageUrl(res.data.url)
+        console.log(res.data);
+        setImageUrl(res.data.data.image);
       })
       .catch((e) => {
-        console.log(e)
+        console.log(e);
       });
   };
 
-  const handleUpload = () =>{
+  const handleUpload = () => {
     axios({
       method: "post",
-      url: "endpoint",
+      url: "http://localhost:9010/api/feed/create",
       data: {
-        imgaUrl:imageUrl,
-        title:title,
-        desc:description
+        image: imageUrl,
+        title: title,
+        description: description,
       },
-    }).then((res)=>{
-      console.log(res)
-    }).catch((e)=>{
-      console.log(e)
+      headers: {
+        Authorization: `Bearer ${ReactSession.get("token")}`,
+      },
     })
-  }
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
   return (
     <div className="profile">
       <Modal
@@ -276,27 +174,44 @@ function Profile() {
               accept="image/jpeg, image/png, image/jpg"
               onChange={handleChange}
             />
-            <input type="text" placeholder="Title" onChange={(e)=>setTitle(e.target.value)} />
-            <textarea placeholder="Description" onChange={(e)=>setDescription(e.target.value)}></textarea>
-            <Button variant="primary" onClick={handleUpload}>Upload</Button>
+            <input
+              type="text"
+              placeholder="Title"
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <textarea
+              placeholder="Description"
+              onChange={(e) => setDescription(e.target.value)}
+            ></textarea>
+            <Button variant="primary" onClick={handleUpload}>
+              Upload
+            </Button>
           </div>
-          
         </Box>
       </Modal>
       <div className="profile__details">
-        <img className="profile__avatar" src={profileUser.image} alt="avatar" />
+        <img
+          className="profile__avatar"
+          src={map.get(profileUser.image)}
+          alt="avatar"
+        />
         <div>
           <div className="name__and__follow__button">
             <h2 className="profile__name">{profileUser.name}</h2>
             <button className="profile__follow__button">Follow</button>
           </div>
-          <p className="profile__description">{profileUser.desc}</p>
+          <p className="profile__description">{"desc"}</p>
         </div>
       </div>
       <div className="nav__bar">
-        <img className="feed__image" src={feedIcon} onClick={setFeedPage} alt="feedimage" />
+        <img
+          className="feed__image"
+          src={feedIcon}
+          onClick={setFeedPage}
+          alt="feedimage"
+        />
         <p className="feed__count" onClick={setFeedPage}>
-          <strong>{profileUser.news} News</strong>
+          <strong>{feedItem.length} News</strong>
           <br />
           <text className="nav__text">Total News Count</text>
         </p>
@@ -307,7 +222,7 @@ function Profile() {
           alt="follower"
         />
         <p className="feed__count" onClick={setFollowingPage}>
-          <strong>{profileUser.followings} Following</strong>
+          <strong>{12} Following</strong>
           <br />
           <text className="nav__text">Total Following Count</text>
         </p>
@@ -318,12 +233,17 @@ function Profile() {
           alt="following"
         />
         <p className="feed__count" onClick={setFollowerPage}>
-          <strong>{profileUser.followers} Followers</strong>
+          <strong>{11} Followers</strong>
           <br />
           <text className="nav__text">Total Followers Count</text>
         </p>
         <div className="upload__image" onClick={handleOpen}>
-          <img className="upload__img" src={upload} onClick={setFollowerPage} alt="upload" />
+          <img
+            className="upload__img"
+            src={upload}
+            onClick={setFollowerPage}
+            alt="upload"
+          />
           <p className="upload__text" onClick={setFollowerPage}>
             <strong>Upload</strong>
             <br />
@@ -348,7 +268,9 @@ function Profile() {
                         <strong>{f.title}</strong>
                       </text>
                       <br />
-                      <text className="profile__feed__desc">{f.desc}</text>
+                      <text className="profile__feed__desc">
+                        {f.description}
+                      </text>
                     </div>
                   </div>
                 </Item>
@@ -390,7 +312,7 @@ function Profile() {
               <Grid item xs={2} sm={4} md={4} key={index}>
                 <Item
                   className="item__item"
-                  onClick={() => handleFollowerClick(index)}
+                  //   onClick={() => handleFollowerClick(index)}
                 >
                   <div className="item__image2">
                     <Avatar className="profile__user__avatar" src={f.image} />

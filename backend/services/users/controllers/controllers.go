@@ -25,6 +25,31 @@ func GetAllUsers() gin.HandlerFunc {
 	}
 }
 
+func GetUserById() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.DefaultQuery("user_id", "0")
+		user_id, _ := strconv.Atoi(id)
+		user, db := usermodel.GetUserById(int64(user_id))
+
+		if db.RecordNotFound() {
+			c.JSON(
+				http.StatusOK, responses.UserResponse{
+					Status: http.StatusOK,
+					Message: "user not found",
+				},
+			)
+		} else {
+			c.JSON(
+				http.StatusOK, responses.UserResponse{
+					Status: http.StatusOK,
+					Message: "success",
+					Data: map[string]interface{}{"user": user},
+				},
+			)
+		}
+	}
+}
+
 func UpdateUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.DefaultQuery("user_id", "0")

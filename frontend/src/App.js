@@ -22,6 +22,7 @@ import { makeStyles } from "@mui/styles";
 import Login from "./Login";
 
 import { ReactSession } from "react-client-session";
+import axios from "axios";
 
 const map = new Map();
 map.set("dany", dany);
@@ -90,23 +91,19 @@ function App() {
     }
   }, []);
 
-  const feedList = [
-    {
-      username: "Pranay",
-      image_url: indiana,
-      caption: "American epic space opera multimedia",
-      desc: "Star Wars is an American epic space opera multimedia franchise created by George Lucas, which began with the eponymous 1977 film and quickly became a worldwide pop-culture phenomenon. The franchise has been expanded into various films and other media, including television series, video games, novels, comic books, theme park attractions, and themed areas, comprising an all-encompassing fictional universe. Star Wars is one of the highest-grossing media franchises of all time. StarWars is an American epic space opera multimedia franchise created byGeorge Lucas, which began with the eponymous 1977 film and quicklybecame a worldwide pop-culture phenomenon. The franchise has beenexpanded into various films and other media, including televisionseries, video games, novels, comic books, theme park attractions, andthemed areas, comprising an all-encompassing fictional universe. StarWars is one of the highest-grossing media franchises of all time. StarWars is an American epic space opera multimedia franchise created byGeorge Lucas, which began with the eponymous 1977 film and quicklybecame a worldwide pop-culture phenomenon. The franchise has beenexpanded into various films and other media, including televisionseries, video games, novels, comic books, theme park attractions, andthemed areas, comprising an all-encompassing fictional universe. StarWars is one of the highest-grossing media franchises of all time. StarWars is an American epic space opera multimedia franchise created byGeorge Lucas, which began with the eponymous 1977 film and quicklybecame a worldwide pop-culture phenomenon. The franchise has beenexpanded into various films and other media, including televisionseries, video games, novels, comic books, theme park attractions, andthemed areas, comprising an all-encompassing fictional universe. StarWars is one of the highest-grossing media franchises of all time.",
+  const config = {
+    headers: {
+      Authorization: `Bearer ${ReactSession.get("token")}`,
     },
-    {
-      username: "Pranay",
-      image_url: dany,
-      caption: "American epic space opera multimedia",
-      desc: "Star Wars is an American epic space opera multimedia franchise created by George Lucas, which began with the eponymous 1977 film and quickly became a worldwide pop-culture phenomenon. The franchise has been expanded into various films and other media, including television series, video games, novels, comic books, theme park attractions, and themed areas, comprising an all-encompassing fictional universe. Star Wars is one of the highest-grossing media franchises of all time. Star Wars is an American epic space opera multimedia franchise created by George Lucas, which began with the eponymous 1977 film and quickly became a worldwide pop-culture phenomenon. The franchise has been expanded into various films and other media, including television series, video games, novels, comic books, theme park attractions, and themed areas, comprising an all-encompassing fictional universe. Star Wars is one of the highest-grossing media franchises of all time. Star Wars is an American epic space opera multimedia franchise created by George Lucas, which began with the eponymous 1977 film and quickly became a worldwide pop-culture phenomenon. The franchise has been expanded into various films and other media, including television series, video games, novels, comic books, theme park attractions, and themed areas, comprising an all-encompassing fictional universe. Star Wars is one of the highest-grossing media franchises of all time. Star Wars is an American epic space opera multimedia franchise created by George Lucas, which began with the eponymous 1977 film and quickly became a worldwide pop-culture phenomenon. The franchise has been expanded into various films and other media, including television series, video games, novels, comic books, theme park attractions, and themed areas, comprising an all-encompassing fictional universe. Star Wars is one of the highest-grossing media franchises of all time.",
-    },
-  ];
+  };
 
   useEffect(() => {
-    setFeeds(feedList.map((f) => f));
+    axios
+      .get(`${process.env.REACT_APP_base_url}api/feeds`, config)
+      .then((res) => {
+        console.log(res);
+        setFeeds(res.data.data.feeds.map((f) => f));
+      });
   }, []);
 
   const signUp = (event) => {
@@ -192,15 +189,15 @@ function App() {
           )}
         </div>
       </div>
- 
 
       {home === 0 ? (
         feeds.map((f) => (
           <Feed
-            username={f.username}
-            image_url={f.image_url}
-            caption={f.caption}
-            desc={f.desc}
+            username={f.user.name}
+            image_url={f.image}
+            caption={f.title}
+            desc={f.description}
+            user_image={map.get(f.user.image)}
           />
         ))
       ) : home === 1 ? (

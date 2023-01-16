@@ -2,7 +2,7 @@ import React from "react";
 import "./feed.css";
 import { Avatar } from "@mui/material";
 
-function Feed({ username, image_url, caption, desc }) {
+function Feed({ username, image_url, caption, desc, user_image }) {
   return (
     <div className="feed">
       <img className="main__image" src={image_url} />
@@ -10,7 +10,7 @@ function Feed({ username, image_url, caption, desc }) {
         <h2 className="feed__text">{caption}</h2>
         <p className="desc__text"> {desc}</p>
         <div className="feed__header">
-          <Avatar className="feed__avatar" src={image_url} />
+          <Avatar className="feed__avatar" src={user_image} />
           <text className="user__name">{username}</text>
         </div>
       </div>

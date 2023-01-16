@@ -10,7 +10,7 @@ var (
 )
 
 func Connect() {
-	d, err := gorm.Open("mysql", "root:duracell@tcp(localhost:3306)/database?charset=utf8&parseTime=True&loc=Local")
+	d, err := gorm.Open("mysql", "root:duracell@tcp(db:3306)/database?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
 		panic(err)
 	}

@@ -40,3 +40,9 @@ func (f *Feed) CreateFeed() *Feed {
 	db.Create(f)
 	return f
 }
+
+func GetFeedByUser(user_id int64) []Feed {
+	var feeds []Feed
+	db.Where("user_id=?", user_id).Preload("User").Find(&feeds)
+	return feeds
+}
