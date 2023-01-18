@@ -107,7 +107,7 @@ function Login({ instance }) {
     event.preventDefault();
 
     axios
-      .post("http://localhost:9010/api/auth/login", {
+      .post("http://process.env.REACT_APP_base_url:9010/api/auth/login", {
         email: email,
         password: password,
       })
@@ -148,7 +148,7 @@ function Login({ instance }) {
       };
       axios
         .put(
-          `http://localhost:9010/api/user/update?user_id=${ReactSession.get(
+          `http://process.env.REACT_APP_base_url:9010/api/user/update?user_id=${ReactSession.get(
             "user_id"
           )}`,
           {
