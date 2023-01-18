@@ -83,7 +83,7 @@ function Login({ instance }) {
     event.preventDefault();
 
     axios
-      .post("http://localhost:9010/api/auth/signup", {
+      .post("http://process.env.REACT_APP_base_url:9010/api/auth/signup", {
         email: email,
         password: password,
         name: name,
