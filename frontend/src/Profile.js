@@ -77,9 +77,14 @@ function Profile() {
   };
 
   useEffect(() => {
-    axios.get("http://process.env.REACT_APP_base_url:9010/api/feed/user", config).then((res) => {
-      setFeedItem(res.data.data.feed.map((f) => f));
-    });
+    axios
+      .get(
+        `http://${process.env.REACT_APP_base_url}:9010/api/feed/user`,
+        config
+      )
+      .then((res) => {
+        setFeedItem(res.data.data.feed.map((f) => f));
+      });
 
     axios
       .get(
@@ -129,7 +134,11 @@ function Profile() {
     };
 
     axios
-      .post("http://process.env.REACT_APP_base_url:9010/api/feed/upload/image", formdata, config)
+      .post(
+        `http://${process.env.REACT_APP_base_url}:9010/api/feed/upload/image`,
+        formdata,
+        config
+      )
       .then((res) => {
         console.log(res.data);
         setImageUrl(res.data.data.image);
@@ -142,7 +151,7 @@ function Profile() {
   const handleUpload = () => {
     axios({
       method: "post",
-      url: "http://process.env.REACT_APP_base_url:9010/api/feed/create",
+      url: `http://${process.env.REACT_APP_base_url}:9010/api/feed/create`,
       data: {
         image: imageUrl,
         title: title,
