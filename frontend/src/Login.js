@@ -83,7 +83,7 @@ function Login({ instance }) {
     event.preventDefault();
 
     axios
-      .post(`http://${process.env.REACT_APP_base_url}api/auth/signup`, {
+      .post(`${process.env.REACT_APP_base_url}api/auth/signup`, {
         email: email,
         password: password,
         name: name,
@@ -107,7 +107,7 @@ function Login({ instance }) {
     event.preventDefault();
 
     axios
-      .post(`http://${process.env.REACT_APP_base_url}api/auth/login`, {
+      .post(`${process.env.REACT_APP_base_url}api/auth/login`, {
         email: email,
         password: password,
       })
@@ -148,7 +148,7 @@ function Login({ instance }) {
       };
       axios
         .put(
-          `http://${
+          `${
             process.env.REACT_APP_base_url
           }api/user/update?user_id=${ReactSession.get("user_id")}`,
           {

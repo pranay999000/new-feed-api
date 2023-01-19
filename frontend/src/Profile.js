@@ -78,7 +78,7 @@ function Profile() {
 
   useEffect(() => {
     axios
-      .get(`http://${process.env.REACT_APP_base_url}api/feed/user`, config)
+      .get(`${process.env.REACT_APP_base_url}api/feed/user`, config)
       .then((res) => {
         setFeedItem(res.data.data.feed.map((f) => f));
       });
@@ -132,7 +132,7 @@ function Profile() {
 
     axios
       .post(
-        `http://${process.env.REACT_APP_base_url}api/feed/upload/image`,
+        `${process.env.REACT_APP_base_url}api/feed/upload/image`,
         formdata,
         config
       )
@@ -148,7 +148,7 @@ function Profile() {
   const handleUpload = () => {
     axios({
       method: "post",
-      url: `http://${process.env.REACT_APP_base_url}api/feed/create`,
+      url: `${process.env.REACT_APP_base_url}api/feed/create`,
       data: {
         image: imageUrl,
         title: title,
