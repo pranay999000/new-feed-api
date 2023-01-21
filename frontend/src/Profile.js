@@ -150,7 +150,7 @@ function Profile() {
       method: "post",
       url: `${process.env.REACT_APP_base_url}api/feed/create`,
       data: {
-        image: imageUrl,
+        // image: imageUrl,
         title: title,
         description: description,
       },
@@ -175,11 +175,11 @@ function Profile() {
       >
         <Box sx={style}>
           <div className="upload">
-            <input
+            {/* <input
               type="file"
               accept="image/jpeg, image/png, image/jpg"
               onChange={handleChange}
-            />
+            /> */}
             <input
               type="text"
               placeholder="Title"
@@ -204,7 +204,7 @@ function Profile() {
         <div>
           <div className="name__and__follow__button">
             <h2 className="profile__name">{profileUser.name}</h2>
-            <button className="profile__follow__button">Follow</button>
+            {/* <button className="profile__follow__button">Follow</button> */}
           </div>
           <p className="profile__description">{"desc"}</p>
         </div>
@@ -221,7 +221,7 @@ function Profile() {
           <br />
           <text className="nav__text">Total News Count</text>
         </p>
-        <img
+        {/* <img
           className="following__image"
           src={followingIcon}
           onClick={setFollowingPage}
@@ -242,7 +242,7 @@ function Profile() {
           <strong>{11} Followers</strong>
           <br />
           <text className="nav__text">Total Followers Count</text>
-        </p>
+        </p> */}
         <div className="upload__image" onClick={handleOpen}>
           <img
             className="upload__img"
@@ -268,7 +268,7 @@ function Profile() {
               <Grid item xs={2} sm={4} md={4} key={index}>
                 <Item className="item__item">
                   <div className="item__image">
-                    <img className="feed__item" src={f.image} alt="feed item" />
+                    {/* <img className="feed__item" src={f.image} alt="feed item" /> */}
                     <div className="item__details">
                       <text>
                         <strong>{f.title}</strong>
