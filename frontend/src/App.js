@@ -198,6 +198,9 @@ function App() {
             caption={f.title}
             desc={f.description}
             user_image={map.get(f.user.image)}
+            comments={
+              f.comments
+            }
           />
         ))
       ) : home === 1 ? (
