@@ -1,0 +1,261 @@
+package services
+
+import (
+	"bytes"
+	"encoding/json"
+	"log"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/pranay999000/follows/functions"
+)
+
+func ConnectOrientDB() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		url := "http://localhost:2480/database/UserGraph"
+		method := "GET"
+
+		client := &http.Client {}
+		req, err := http.NewRequest(method, url, nil)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+			})
+			return
+		}
+		
+		req.Header.Add("Authorization", "Basic " + functions.BasicAuth("root", "password"))
+
+		res, err := client.Do(req)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+			})
+			return
+		}
+		defer res.Body.Close()
+
+		var respBody gin.H
+
+		decoder := json.NewDecoder(res.Body)
+		jsonErr := decoder.Decode(&respBody)
+
+		if jsonErr != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"response": respBody,
+		})
+	}
+}
+
+func GetFollows() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		orientDBUrl := "http://localhost:2480/command/UserGraph/sql"
+		method := "POST"
+
+		user_id := c.Param("user_id")
+		direction := c.Param("direction")
+
+		var b  = []byte(`{"command": "select expand( `)
+		var directionIn = []byte(`in()`)
+		var directionOut = []byte(`out()`)
+		
+		if direction == "following" {
+			b = append(b, directionOut...)
+		} else {
+			b = append(b, directionIn...)
+		}
+
+		var mid = []byte(` ) from follows where user_id = :user_id","parameters": {"user_id": "`)
+
+		b = append(b, mid...)
+		user_byte := []byte(user_id)
+		b = append(b, user_byte...)
+		var end = []byte(`",}}`)
+		b = append(b, end...)
+
+		client := &http.Client{}
+		req, err := http.NewRequest(method, orientDBUrl, bytes.NewBuffer(b))
+		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+		if err != nil {
+			log.Fatalln(err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+			})
+			return
+		}
+
+		req.Header.Add("Authorization", "Basic " + functions.BasicAuth("root", "password"))
+
+		res, err := client.Do(req)
+		if err != nil {
+			log.Fatalln(err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+			})
+			return
+		}
+		defer res.Body.Close()
+
+		var respBody gin.H
+
+		decoder := json.NewDecoder(res.Body)
+		jsonErr := decoder.Decode(&respBody)
+
+		if jsonErr != nil {
+			log.Fatalln(jsonErr)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"response": respBody,
+		})
+	}
+}
+
+func CreateUserVertex() gin.HandlerFunc{
+	return func(c *gin.Context) {
+		orientDBUrl := "http://localhost:2480/command/UserGraph/sql"
+		method := "POST"
+
+		user_id := c.Param("user_id")
+
+		var reqBody = []byte(`{"command": "create vertex Follows set user_id = :user_id", "parameters": {"user_id": "`)
+		user_byte := []byte(user_id)
+		reqBody = append(reqBody, user_byte...)
+		var end = []byte(`",}}`)
+		reqBody = append(reqBody, end...)
+
+		client := &http.Client{}
+		req, err := http.NewRequest(method, orientDBUrl, bytes.NewBuffer(reqBody))
+		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+		if err != nil {
+			log.Fatalln(err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+			})
+			return
+		}
+
+		req.Header.Add("Authorization", "Basic " + functions.BasicAuth("root", "password"))
+
+		res, err := client.Do(req)
+
+		if err != nil {
+			log.Fatalln(err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+			})
+			return
+		}
+		defer res.Body.Close()
+
+		var respBody gin.H
+
+		decoder := json.NewDecoder(res.Body)
+		jsonErr := decoder.Decode(&respBody)
+
+		if jsonErr != nil {
+			log.Fatalln(jsonErr)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"response": respBody,
+		})
+	}
+}
+
+func CreateFollowEdge() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// orientDBUrl := "http://localhost:2480/command/UserGraph/sql"
+		// method := "POST"
+
+		user_id := c.Param("user_id")
+		following_user_id := c.Param("following_user_id")
+
+		channel := make(chan bool, 2)
+
+		// user_byte := []byte(user_id)
+		// following_byte := []byte(following_user_id)
+		
+		go functions.CheckVertesExists(user_id, channel)
+		go functions.CheckVertesExists(following_user_id, channel)
+
+		checkUser := <- channel
+		checkFollowingUser := <- channel
+
+		if !checkUser || !checkFollowingUser {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "Unable to find user",
+			})
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"response": "respBody",
+		})
+
+		/*
+		var reqBody = []byte(`{"command": "create edge Following from ( select from Follows where user_id = :user_id ) to ( select from Follows where user_id = :following_user_id )", "parameters": {"user_id": "`)
+		reqBody = append(reqBody, user_byte...)
+		var mid = []byte(`", "following_user_id": "`)
+		reqBody = append(reqBody, mid...)
+		reqBody = append(reqBody, following_byte...)
+		reqBody = append(reqBody, end...)
+
+		fmt.Println(string(reqBody))
+
+		req, err := http.NewRequest(method, orientDBUrl, bytes.NewBuffer(reqBody))
+		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+		req.Header.Add("Authorization", "Basic " + basicAuth("root", "password"))
+
+		if err != nil {
+			log.Fatalln(err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+			})
+			return
+		}
+
+		res, err := client.Do(req)
+		if err != nil {
+			log.Fatalln(err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+			})
+			return
+		}
+		defer res.Body.Close()
+
+		var respBody gin.H
+
+		decoder := json.NewDecoder(res.Body)
+		jsonErr := decoder.Decode(&respBody)
+
+		if jsonErr != nil {
+			log.Fatalln(jsonErr)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+			})
+			return
+		}
+
+		*/
+
+	}
+}
