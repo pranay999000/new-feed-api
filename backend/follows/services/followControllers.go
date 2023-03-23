@@ -130,6 +130,20 @@ func CreateUserVertex() gin.HandlerFunc{
 
 		user_id := c.Param("user_id")
 
+		channel := make(chan bool, 1)
+
+		go functions.CheckVertesExists(user_id, channel)
+
+		checkVertex := <- channel
+
+		if checkVertex {
+			c.JSON(http.StatusOK, gin.H{
+				"success": true,
+				"message": "Vertex already exists",
+			})
+			return
+		}
+
 		var reqBody = []byte(`{"command": "create vertex Follows set user_id = :user_id", "parameters": {"user_id": "`)
 		user_byte := []byte(user_id)
 		reqBody = append(reqBody, user_byte...)
@@ -182,17 +196,108 @@ func CreateUserVertex() gin.HandlerFunc{
 
 func CreateFollowEdge() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// orientDBUrl := "http://localhost:2480/command/UserGraph/sql"
-		// method := "POST"
+		orientDBUrl := "http://localhost:2480/command/UserGraph/sql"
+		method := "POST"
+
+		user_id := c.Param("user_id")
+		following_user_id := c.Param("following_user_id")
+
+		channel := make(chan bool, 2)
+		
+		go functions.CheckVertesExists(user_id, channel)
+		go functions.CheckVertesExists(following_user_id, channel)
+		
+		checkUser := <- channel
+		checkFollowingUser := <- channel
+		
+		if !checkUser || !checkFollowingUser {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "Unable to find user",
+			})
+			return
+		}
+
+		channelCheckEdge := make(chan bool, 1)
+
+		go functions.CheckEdgeExists(user_id, following_user_id, channelCheckEdge)
+
+		checkEdge := <- channelCheckEdge
+
+		if checkEdge {
+			c.JSON(http.StatusOK, gin.H{
+				"success": true,
+				"message": "Edge already exists",
+			})
+			return
+		}
+
+		user_byte := []byte(user_id)
+		following_byte := []byte(following_user_id)
+		
+		var reqBody = []byte(`{"command": "create edge Following from ( select from Follows where user_id = :user_id ) to ( select from Follows where user_id = :following_user_id )", "parameters": {"user_id": "`)
+		reqBody = append(reqBody, user_byte...)
+		var mid = []byte(`", "following_user_id": "`)
+		reqBody = append(reqBody, mid...)
+		reqBody = append(reqBody, following_byte...)
+		var end = []byte(`",}}`)
+		reqBody = append(reqBody, end...)
+		
+		client := &http.Client{}
+		req, err := http.NewRequest(method, orientDBUrl, bytes.NewBuffer(reqBody))
+		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+		req.Header.Add("Authorization", "Basic " + functions.BasicAuth("root", "password"))
+
+		if err != nil {
+			log.Fatalln(err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+			})
+			return
+		}
+
+		res, err := client.Do(req)
+		if err != nil {
+			log.Fatalln(err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+			})
+			return
+		}
+		defer res.Body.Close()
+		
+		var respBody gin.H
+		
+		decoder := json.NewDecoder(res.Body)
+		jsonErr := decoder.Decode(&respBody)
+		
+		if jsonErr != nil {
+			log.Fatalln(jsonErr)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+			})
+			return
+		}
+		
+		
+		c.JSON(http.StatusOK, gin.H{
+			"response": respBody,
+		})
+		
+
+	}
+}
+
+func DeleteEdge() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		orientDBUrl := "http://localhost:2480/command/UserGraph/sql"
+		method := "POST"
 
 		user_id := c.Param("user_id")
 		following_user_id := c.Param("following_user_id")
 
 		channel := make(chan bool, 2)
 
-		// user_byte := []byte(user_id)
-		// following_byte := []byte(following_user_id)
-		
 		go functions.CheckVertesExists(user_id, channel)
 		go functions.CheckVertesExists(following_user_id, channel)
 
@@ -204,25 +309,33 @@ func CreateFollowEdge() gin.HandlerFunc {
 				"success": false,
 				"message": "Unable to find user",
 			})
+			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"response": "respBody",
-		})
+		channelCheckEdge := make(chan string, 1)
 
-		/*
-		var reqBody = []byte(`{"command": "create edge Following from ( select from Follows where user_id = :user_id ) to ( select from Follows where user_id = :following_user_id )", "parameters": {"user_id": "`)
-		reqBody = append(reqBody, user_byte...)
-		var mid = []byte(`", "following_user_id": "`)
-		reqBody = append(reqBody, mid...)
-		reqBody = append(reqBody, following_byte...)
+		go functions.GetEdge(user_id, following_user_id, channelCheckEdge)
+
+		checkEdge := <- channelCheckEdge
+
+		if checkEdge == "" {
+			c.JSON(http.StatusOK, gin.H{
+				"success": true,
+				"message": "Edge does not exists",
+			})
+			return
+		}
+
+		var reqBody = []byte(`{"command": "delete edge `)
+		edge_byte := []byte(checkEdge)
+		reqBody = append(reqBody, edge_byte...)
+		var end = []byte(`"}`)
 		reqBody = append(reqBody, end...)
 
-		fmt.Println(string(reqBody))
-
+		client := &http.Client{}
 		req, err := http.NewRequest(method, orientDBUrl, bytes.NewBuffer(reqBody))
 		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-		req.Header.Add("Authorization", "Basic " + basicAuth("root", "password"))
+		req.Header.Add("Authorization", "Basic " + functions.BasicAuth("root", "password"))
 
 		if err != nil {
 			log.Fatalln(err)
@@ -246,7 +359,7 @@ func CreateFollowEdge() gin.HandlerFunc {
 
 		decoder := json.NewDecoder(res.Body)
 		jsonErr := decoder.Decode(&respBody)
-
+		
 		if jsonErr != nil {
 			log.Fatalln(jsonErr)
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -254,8 +367,10 @@ func CreateFollowEdge() gin.HandlerFunc {
 			})
 			return
 		}
-
-		*/
-
+		
+		
+		c.JSON(http.StatusOK, gin.H{
+			"response": respBody,
+		})
 	}
 }
