@@ -66,5 +66,35 @@ services:
     networks:
       - overlay
 
+  phpmyadmin:
+    depends_on:
+      - mysql_master
+      - mysql_slave_1
+      - mysql_slave_2
+      - mysql_slave_3
+    image: phpmyadmin:latest
+    environment:
+      PMA_HOST: mysql-master
+    ports:
+      - 8080:80
+    container_name: phpmyadmin
+    networks:
+      - overlay
+
+  haproxy:
+    image: haproxy:alpine3.17
+    container_name: haproxy
+    ports:
+      - 3300:3300
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - mysql_master
+      - mysql_slave_1
+      - mysql_slave_2
+      - mysql_slave_3
+    networks:
+      - overlay
+
 networks:
   overlay:
