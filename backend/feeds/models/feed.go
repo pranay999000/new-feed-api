@@ -1,13 +1,11 @@
 package models
 
 import (
-	"time"
-
 	"github.com/jinzhu/gorm"
 	"github.com/pranay999000/feeds/configs"
 )
 
-var db *gorm.DB
+var readdb *gorm.DB
 var writedb *gorm.DB
 
 type Feed struct {
@@ -15,19 +13,46 @@ type Feed struct {
 	Title		string		`json:"title"`
 	Body		string		`json:"body"`
 	Image		string		`json:"image"`
-	TimeStamp	time.Time	`json:"timestamp"`
+	UserId		string		`json:"user_id"`
+	LikeCount	int64		`json:"like_count"`
+	ViewCount	int64		`json:"view_count"`
 }
 
 func init() {
 	configs.WriteConnect()
-	configs.Connect()
+	configs.ReadConnect()
 	writedb = configs.GetWriteDB()
-	db = configs.GetDB()
+	readdb = configs.GetReadDB()
 	writedb.AutoMigrate(&Feed{})
 }
 
 func GetFeeds() []Feed {
 	var feeds []Feed
-	db.Find(&feeds)
+	readdb.Find(&feeds)
 	return feeds
+}
+
+func (f *Feed) CreateFeed() *Feed {
+	writedb.NewRecord(f)
+	writedb.Create(f)
+	return f
+}
+
+func GetFeedById(id int64) (*Feed, *gorm.DB) {
+	var feed Feed
+	f := readdb.Where("id=?", id).Find(&feed)
+	return &feed, f
+}
+
+func GetFeedByUser(user_id int64) []Feed {
+	var feeds []Feed
+	readdb.Where("user_id=?", user_id).Find(&feeds)
+	return feeds
+}
+
+func CheckFeed(feed_id int64, channel chan Feed) {
+	var feed Feed
+	readdb.Where("ID=?", feed_id).First(&feed)
+
+	channel <- feed
 }

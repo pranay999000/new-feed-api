@@ -23,6 +23,7 @@ func main() {
 	r := gin.Default()
 
 	InitRouters(r)
+	services.CreateUserNode()
 
 	err := r.Run(":8002")
 	if err != nil {

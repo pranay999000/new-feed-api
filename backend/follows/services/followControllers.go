@@ -125,55 +125,17 @@ func GetFollows() gin.HandlerFunc {
 
 func CreateUserVertex() gin.HandlerFunc{
 	return func(c *gin.Context) {
-		orientDBUrl := "http://localhost:2480/command/UserGraph/sql"
-		method := "POST"
-
 		user_id := c.Param("user_id")
 
-		channel := make(chan bool, 1)
 
-		go functions.CheckVertesExists(user_id, channel)
-
-		checkVertex := <- channel
-
-		if checkVertex {
-			c.JSON(http.StatusOK, gin.H{
-				"success": true,
-				"message": "Vertex already exists",
-			})
-			return
-		}
-
-		var reqBody = []byte(`{"command": "create vertex Follows set user_id = :user_id", "parameters": {"user_id": "`)
-		user_byte := []byte(user_id)
-		reqBody = append(reqBody, user_byte...)
-		var end = []byte(`",}}`)
-		reqBody = append(reqBody, end...)
-
-		client := &http.Client{}
-		req, err := http.NewRequest(method, orientDBUrl, bytes.NewBuffer(reqBody))
-		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+		res, err := functions.CreateVertex(user_id)
 
 		if err != nil {
-			log.Fatalln(err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"success": false,
-			})
-			return
+				"message": err.Error(),
+			})	
 		}
-
-		req.Header.Add("Authorization", "Basic " + functions.BasicAuth("root", "password"))
-
-		res, err := client.Do(req)
-
-		if err != nil {
-			log.Fatalln(err)
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"success": false,
-			})
-			return
-		}
-		defer res.Body.Close()
 
 		var respBody gin.H
 

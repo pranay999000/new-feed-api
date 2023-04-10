@@ -38,6 +38,7 @@ func SignUpUser() gin.HandlerFunc {
 
 				newUser.ID = userResponse.InsertedID.(primitive.ObjectID)
 				newUser.Password = ""
+				CreateUserNode(newUser.ID.Hex())
 
 				c.JSON(http.StatusCreated, gin.H{
 					"success": true,

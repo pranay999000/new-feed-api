@@ -9,7 +9,7 @@ var (
 	db *gorm.DB
 )
 
-func Connect() {
+func ReadConnect() {
 	d, err := gorm.Open("mysql", "root:masterpassword@tcp(127.0.0.1:3300)/masterdatabase?charset=utf8&parseTime=True&loc=Local")
 
 	if err != nil {
@@ -18,6 +18,6 @@ func Connect() {
 	db = d
 }
 
-func GetDB() *gorm.DB {
+func GetReadDB() *gorm.DB {
 	return db
 }

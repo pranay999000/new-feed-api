@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -184,4 +185,47 @@ func GetEdge(user_id string, following_user_id string, channel chan string) {
 		}
 	}
 	channel <- ""
+}
+
+func CreateVertex(user_id string) (*http.Response, error) {
+		orientDBUrl := "http://localhost:2480/command/UserGraph/sql"
+		method := "POST"
+
+		channel := make(chan bool, 1)
+
+		go CheckVertesExists(user_id, channel)
+
+		checkVertex := <- channel
+
+		if checkVertex {
+			return nil, fmt.Errorf("vertex already exists") 
+		}
+
+		var reqBody = []byte(`{"command": "create vertex Follows set user_id = :user_id", "parameters": {"user_id": "`)
+		user_byte := []byte(user_id)
+		reqBody = append(reqBody, user_byte...)
+		var end = []byte(`",}}`)
+		reqBody = append(reqBody, end...)
+
+		client := &http.Client{}
+		req, err := http.NewRequest(method, orientDBUrl, bytes.NewBuffer(reqBody))
+		req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+		if err != nil {
+			log.Fatalln(err)
+			return nil, fmt.Errorf("Internal Server Error")
+		}
+
+		req.Header.Add("Authorization", "Basic " + BasicAuth("root", "password"))
+
+		res, err := client.Do(req)
+
+		if err != nil {
+			log.Fatalln(err)
+			return nil, fmt.Errorf("Failed to get orientDB response")
+		}
+
+		defer res.Body.Close()
+
+		return res, nil
 }
