@@ -44,3 +44,4 @@ func GetRecent() []Recent {
 	readRecentDB.Preload("Feed").Find(&recents)
 	return recents
 }
+

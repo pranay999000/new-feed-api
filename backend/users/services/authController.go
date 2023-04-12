@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pranay999000/users/configs"
+	"github.com/pranay999000/users/functions"
 	"github.com/pranay999000/users/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -38,7 +39,7 @@ func SignUpUser() gin.HandlerFunc {
 
 				newUser.ID = userResponse.InsertedID.(primitive.ObjectID)
 				newUser.Password = ""
-				CreateUserNode(newUser.ID.Hex())
+				functions.CreateUserNode(newUser.ID.Hex())
 
 				c.JSON(http.StatusCreated, gin.H{
 					"success": true,

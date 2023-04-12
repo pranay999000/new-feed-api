@@ -10,7 +10,13 @@ import (
 
 func GetFeeds() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		feeds := models.GetFeeds()
+		limitStr := c.Query("limit")
+		pageStr := c.Query("page")
+
+		limit, _ := strconv.Atoi(limitStr)
+		page, _ := strconv.Atoi(pageStr)
+
+		feeds := models.GetFeeds(int64(limit), int64(page))
 
 		c.JSON(http.StatusOK, gin.H{
 			"success": true,

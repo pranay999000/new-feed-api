@@ -26,9 +26,9 @@ func init() {
 	writedb.AutoMigrate(&Feed{})
 }
 
-func GetFeeds() []Feed {
+func GetFeeds(limit int64, page int64) []Feed {
 	var feeds []Feed
-	readdb.Find(&feeds)
+	readdb.Order("").Offset((page - 1) * limit).Limit(limit).Find(&feeds)
 	return feeds
 }
 

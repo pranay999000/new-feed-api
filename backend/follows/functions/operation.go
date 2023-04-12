@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/pranay999000/follows/configs"
 	"github.com/pranay999000/follows/models"
 )
 
@@ -228,4 +229,55 @@ func CreateVertex(user_id string) (*http.Response, error) {
 		defer res.Body.Close()
 
 		return res, nil
+}
+
+func GetUserData(raw models.User) (*models.UserData, error) {
+	var ids []string
+
+	for _, r := range raw.Result {
+		ids = append(ids, r.UserId)
+	}
+
+	userUrl, err := configs.EnvMap("users")
+
+	if err != nil {
+		return nil, err
+	}
+
+	jsonData, err := json.Marshal(ids)
+
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", userUrl + "ids", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{}
+
+	res, err := client.Do(req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+
+	var result models.UserData
+
+	body, err  := io.ReadAll(res.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }

@@ -3,11 +3,13 @@ package services
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pranay999000/follows/functions"
+	"github.com/pranay999000/follows/models"
 )
 
 func ConnectOrientDB() gin.HandlerFunc {
@@ -104,21 +106,26 @@ func GetFollows() gin.HandlerFunc {
 		}
 		defer res.Body.Close()
 
-		var respBody gin.H
+		var result models.User
 
-		decoder := json.NewDecoder(res.Body)
-		jsonErr := decoder.Decode(&respBody)
+		body, err := io.ReadAll(res.Body)
 
-		if jsonErr != nil {
-			log.Fatalln(jsonErr)
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"success": false,
-			})
-			return
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := json.Unmarshal(body, &result); err != nil {
+			log.Fatalln(err)
+		}
+
+		users, err := functions.GetUserData(result)
+
+		if err != nil {
+			log.Fatalln(err)
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"response": respBody,
+			"response": users,
 		})
 	}
 }
@@ -227,23 +234,21 @@ func CreateFollowEdge() gin.HandlerFunc {
 			return
 		}
 		defer res.Body.Close()
-		
-		var respBody gin.H
-		
-		decoder := json.NewDecoder(res.Body)
-		jsonErr := decoder.Decode(&respBody)
-		
-		if jsonErr != nil {
-			log.Fatalln(jsonErr)
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"success": false,
-			})
-			return
+
+		var result models.User
+
+		body, err := io.ReadAll(res.Body)
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := json.Unmarshal(body, &result); err != nil {
+			log.Fatalln(err.Error())
 		}
 		
-		
 		c.JSON(http.StatusOK, gin.H{
-			"response": respBody,
+			"response": result,
 		})
 		
 
@@ -317,22 +322,21 @@ func DeleteEdge() gin.HandlerFunc {
 		}
 		defer res.Body.Close()
 
-		var respBody gin.H
+		var result models.User
 
-		decoder := json.NewDecoder(res.Body)
-		jsonErr := decoder.Decode(&respBody)
-		
-		if jsonErr != nil {
-			log.Fatalln(jsonErr)
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"success": false,
-			})
-			return
+		body, err := io.ReadAll(res.Body)
+
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
+		if err := json.Unmarshal(body, &result); err != nil {
+			log.Fatalln(err.Error())
 		}
 		
 		
 		c.JSON(http.StatusOK, gin.H{
-			"response": respBody,
+			"response": result,
 		})
 	}
 }
