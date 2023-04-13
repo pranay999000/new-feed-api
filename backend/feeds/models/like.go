@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/jinzhu/gorm"
 	"github.com/pranay999000/feeds/configs"
@@ -42,12 +43,12 @@ func (like *Like) CreateLike() error {
 	channelCheckLike := <- channelLike
 	channelCheckFeed := <- channelFeed
 
-	if (Feed{}) == channelCheckFeed {
+	if reflect.ValueOf(channelCheckFeed).IsZero() {
 		return fmt.Errorf("no feed found")
 	}
 
 	transactionDB.Transaction(func(tx *gorm.DB) error {
-		if channelCheckLike != (Like{}) {
+		if !reflect.ValueOf(channelCheckLike).IsZero() {
 			if err := tx.Delete(&Like{}, channelCheckLike.ID).Error; err != nil {
 				return err
 			}

@@ -16,6 +16,7 @@ type Feed struct {
 	UserId		string		`json:"user_id"`
 	LikeCount	int64		`json:"like_count"`
 	ViewCount	int64		`json:"view_count"`
+	Likes		[]Like		`gorm:"foreignKey:FeedId"`
 }
 
 func init() {
@@ -26,10 +27,18 @@ func init() {
 	writedb.AutoMigrate(&Feed{})
 }
 
-func GetFeeds(limit int64, page int64) []Feed {
+func GetFeeds(limit int64, page int64, user_ids []string) []Feed {
 	var feeds []Feed
-	readdb.Order("").Offset((page - 1) * limit).Limit(limit).Find(&feeds)
-	return feeds
+
+	if len(user_ids) > 0 {
+
+		readdb.Where("user_id IN (?)", user_ids).Order("created_at desc").Offset((page - 1) * limit).Limit(limit).Find(&feeds)
+		// readdb.Raw("SELECT feeds.id, feeds.created_at, feeds.title, feeds.body, feeds.image, feeds.user_id, feeds.like_count, feeds.view_count, likes. FROM feeds LEFT JOIN likes ON feeds.id = likes.feed_id WHERE feeds.user_id IN (?)", user_ids).Scan(&feeds)
+		return feeds
+	} else {
+		readdb.Order("created_at desc").Offset((page - 1) * limit).Limit(limit).Find(&feeds)
+		return feeds
+	}
 }
 
 func (f *Feed) CreateFeed() *Feed {
@@ -40,7 +49,7 @@ func (f *Feed) CreateFeed() *Feed {
 
 func GetFeedById(id int64) (*Feed, *gorm.DB) {
 	var feed Feed
-	f := readdb.Where("id=?", id).Find(&feed)
+	f := readdb.Where("id=?", id).Preload("Likes").Find(&feed)
 	return &feed, f
 }
 

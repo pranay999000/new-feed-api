@@ -125,7 +125,7 @@ func GetFollows() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"response": users,
+			"users": users.Users,
 		})
 	}
 }
