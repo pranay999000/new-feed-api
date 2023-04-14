@@ -2,18 +2,15 @@ package configs
 
 import (
 	"errors"
-	"log"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 func EnvMap(key string) (string, error) {
-	err := godotenv.Load()
+	// err := godotenv.Load(".env")
 
-	if err != nil {
-		log.Fatal("Error loading env")
-	}
+	// if err != nil {
+	// 	log.Fatal("Error loading env :", err.Error())
+	// }
 
 	if os.Getenv(key) == "" {
 		return "", errors.New("env not found")

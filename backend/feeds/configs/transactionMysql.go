@@ -1,13 +1,22 @@
 package configs
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/jinzhu/gorm"
+	"github.com/pranay999000/feeds/utils"
+)
 
 var (
 	transactionDB *gorm.DB
 )
 
 func TransactionConnect() {
-	transactiondb, err := gorm.Open("mysql", "root:masterpassword@tcp(127.0.0.1:3306)/masterdatabase?charset=utf8&parseTime=True&loc=Local")
+	writeMySQLHost, err := EnvMap("write_mysql_host")
+	utils.FailOnError(err, "Unable to find write_mysql_host")
+
+	writeMySQLPort, err := EnvMap("write_mysql_port")
+	utils.FailOnError(err, "Unable to find write_mysql_port")
+
+	transactiondb, err := gorm.Open("mysql", "root:masterpassword@tcp(" + writeMySQLHost + ":" + writeMySQLPort + ")/masterdatabase?charset=utf8&parseTime=True&loc=Local")
 
 	if err != nil {
 		panic(err.Error())

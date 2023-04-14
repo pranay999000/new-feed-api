@@ -21,7 +21,7 @@ func GetAllUsers() gin.HandlerFunc {
 		limit, _ := strconv.Atoi(c.DefaultQuery("limit", "12"))
 		defer cancel()
 
-		opts := options.Find().SetSkip(int64((page - 1) * limit)).SetLimit(int64(limit))
+		opts := options.Find().SetSkip(int64((page - 1) * limit)).SetLimit(int64(limit)).SetProjection(bson.M{"password": 0})
 		filter := bson.D{}
 
 		cursor, err := userCollection.Find(ctx, filter, opts)
@@ -76,7 +76,9 @@ func GetUserById() gin.HandlerFunc {
 
 		var result bson.M
 
-		cursor := userCollection.FindOne(ctx, filter).Decode(&result)
+		opts := options.FindOne().SetProjection(bson.M{"password": 0})
+
+		cursor := userCollection.FindOne(ctx, filter, opts).Decode(&result)
 		
 		if cursor != nil {
 			if cursor == mongo.ErrNoDocuments {
@@ -120,29 +122,12 @@ func GetUsersByIds() gin.HandlerFunc {
 			oids = append(oids, id)
 		}
 
-		filter := bson.M{"_id": bson.M{"$in": oids}}
-
-		cursor, err := userCollection.Find(ctx, filter)
-		
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"success": false,
-			})
-			return
-		}
-		
-		defer cursor.Close(ctx)
-
 		var userList []models.User
-		for cursor.Next(ctx) {
-			var user models.User
+		opts := options.FindOne().SetProjection(bson.M{"password": 0})
 
-			if err = cursor.Decode(&user); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"success": false,
-				})
-				return
-			}
+		for _, ids := range oids {
+			var user models.User
+			userCollection.FindOne(ctx, bson.M{"_id": ids}, opts).Decode(&user)
 
 			userList = append(userList, user)
 		}

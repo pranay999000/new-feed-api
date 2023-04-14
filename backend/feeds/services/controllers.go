@@ -141,8 +141,6 @@ func UpdateView() gin.HandlerFunc {
 			return
 		} else {
 			models.CreateView(int64(f_id), feed.ViewCount)
-			feed.ViewCount += 1
-			models.UpdatePopular(feed)
 			c.JSON(http.StatusOK, gin.H{
 				"success": true,
 			})
